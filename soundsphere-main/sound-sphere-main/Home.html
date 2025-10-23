@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SoundSphere</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CONSOLIDATED CSS FOR THE ENTIRE SPA --- */
+        :root {
+            --bg-color: #f8f9fa;
+            --sidebar-bg: #ffffff;
+            --primary: #6c5ce7;
+            --primary-light: #e9e7ff;
+            --text-color: #343a40;
+            --text-light: #6c757d;
+            --border-color: #dee2e6;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --danger: #dc3545;
+            --danger-light: #f8d7da;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background: var(--bg-color);
+            overflow: hidden;
+        }
+
+        /* ===== 1. CORE LAYOUT & SIDEBAR (SHARED) ===== */
+        aside {
+            width: 220px;
+            background: var(--sidebar-bg);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            width: 40px;
+            height: auto;
+        }
+
+        .brand-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #2d9cdb;
+        }
+
+        nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        nav a.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        nav h4 {
+            margin: 1.5rem 0 0.5rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 2.5rem;
+            overflow-y: auto;
+            padding-bottom: 140px;
+        }
+
+        /* ===== 2. HOME PAGE & MUSIC CARD STYLES ===== */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        /* Genre picker styles placed next to the search input */
+        .search-bar #genrePicker {
+            position: relative;
+            margin-left: 4px;
+            display: inline-block;
+        }
+
+        .genre-btn {
+            padding: 6px 8px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .genre-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            background: #fff;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            max-height: 220px;
+            overflow: auto;
+            z-index: 2000;
+            min-width: 160px;
+        }
+
+        .search-bar .icon {
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .music-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .music-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .music-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: var(--card-shadow);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .music-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 160px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            font-size: 1.5rem;
+            color: var(--primary);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .music-card:hover .play-button {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-bottom: 0.2rem;
+        }
+
+        .card-artist {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .card-stats {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            border-top: 1px solid var(--bg-color);
+            padding-top: 0.5rem;
+        }
+
+        /* ===== 3. PLAYER STYLES (SHARED) ===== */
+        .music-player {
+            position: fixed;
+            bottom: 0;
+            left: 220px;
+            right: 0;
+            background: #fff;
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 2000;
+        }
+
+        .current-track {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 200px;
+            overflow: hidden;
+        }
+
+        .current-track-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+            background-color: #e9ecef;
+        }
+
+        .current-track-info {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .player-controls {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+        }
+
+        .play-pause-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .time-display {
+            font-size: 0.8rem;
+            min-width: 35px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 2px;
+            width: 0%;
+        }
+
+        /* ===== 4. ACCOUNT & SETTINGS PAGE STYLES ===== */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            margin-top: 2rem;
+        }
+
+        .card-header {
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-header h3 {
+            font-size: 1.25rem;
+        }
+
+        .section-header {
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        input:disabled {
+            background-color: #f1f3f5;
+            cursor: not-allowed;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .track-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .track-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .track-item:hover {
+            background-color: var(--bg-color);
+        }
+
+        .track-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .track-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .track-title {
+            font-weight: 500;
+        }
+
+        .track-artist {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .track-stats {
+            text-align: right;
+        }
+
+        .play-count {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .play-count-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .no-tracks-message {
+            padding: 1rem;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .danger-zone {
+            border: 1px solid var(--danger);
+            border-radius: 12px;
+            margin-top: 2rem;
+        }
+
+        .danger-zone .card-header {
+            border-color: var(--danger);
+            background-color: var(--danger-light);
+            padding: 1rem 2rem;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .danger-zone .card-header h3 {
+            color: var(--danger);
+        }
+
+        .danger-zone .content {
+            padding: 2rem;
+        }
+
+        .danger-zone p {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        /* ===== 5. UPLOAD PAGE STYLES ===== */
+        .upload-page-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .upload-form-card {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2.5rem;
+            background: #fff;
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .upload-column-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .upload-dropzone {
+            flex-grow: 1;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background-color: #fff;
+        }
+
+        .upload-dropzone:hover,
+        .upload-dropzone.dragover {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .dropzone-content {
+            text-align: center;
+        }
+
+        .dropzone-icon {
+            color: var(--primary);
+            width: 48px;
+            height: 48px;
+            stroke-width: 1;
+        }
+
+        .dropzone-text-primary {
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 0.5rem;
+        }
+
+        .dropzone-text-secondary {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .dropzone-file-info {
+            font-size: 0.8rem;
+            color: var(--text-color);
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+
+        .cover-art-preview-area {
+            margin-top: 1.5rem;
+        }
+
+        .cover-art-preview-area label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .cover-art-preview {
+            width: 100%;
+            padding-bottom: 100%;
+            border-radius: 8px;
+            background-color: #e9ecef;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--text-light);
+        }
+
+        .upload-column-right {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-row,
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="file"] {
+            padding: 0.2rem;
+        }
+
+        .dynamic-field {
+            display: none;
+        }
+
+        .form-actions {
+            margin-top: auto;
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .upload-btn {
+            background: var(--primary);
+            color: #fff;
+            padding: 0.85rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .upload-btn:disabled {
+            background: #ccc;
+        }
+
+        /* ===== 6. KEBAB MENU STYLES ===== */
+        .track-actions {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .kebab-menu-button {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .kebab-menu-button:hover {
+            background-color: #e9ecef;
+        }
+
+        .kebab-menu-button svg {
+            width: 20px;
+            height: 20px;
+            color: var(--text-light);
+        }
+
+        .kebab-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            z-index: 10;
+            list-style: none;
+            margin: 0;
+            min-width: 160px;
+            display: none;
+        }
+
+        .kebab-menu.visible {
+            display: block;
+        }
+
+        .kebab-menu-item {
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .kebab-menu-item:hover {
+            background-color: var(--bg-color);
+        }
+
+        .kebab-menu-item.danger-action {
+            color: var(--danger);
+        }
+
+        .kebab-menu-item.danger-action:hover {
+            background-color: var(--danger-light);
+        }
+
+        /* ===== 7. EDIT MODAL STYLES ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .upload-form-card {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <aside>
+        <div class="brand"><img src="Vector.png" alt="SoundSphere Logo" class="logo" /><span
+                class="brand-name">SoundSphere</span></div>
+        <nav id="mainNav">
+            <a data-page="home" class="active"><span>🏠</span><span>Home</span></a>
+            <h4>More</h4>
+            <a data-page="settings"><span>⚙️</span><span>Setting</span></a>
+            <a data-page="account"><span>👤</span><span>Account</span></a>
+            <a data-page="upload"><span>⬆️</span><span>Upload</span></a>
+            <a id="logoutBtn"><span>🚪</span><span>Logout</span></a>
+        </nav>
+    </aside>
+
+    <main>
+        <div class="content-area" id="content-area"></div>
+
+        <div class="music-player">
+            <div class="current-track">
+                <div class="current-track-image" id="playerTrackImage">🎵</div>
+                <div class="current-track-info">
+                    <h4 id="playerTrackTitle">Select a song</h4>
+                    <p id="playerTrackArtist"></p>
+                </div>
+            </div>
+            <div class="player-controls">
+                <div class="control-buttons">
+                    <button class="control-btn" onclick="previousTrack()">⏮</button>
+                    <button class="control-btn play-pause-btn" id="playPauseBtn">▶</button>
+                    <button class="control-btn" onclick="nextTrack()">⏭</button>
+                </div>
+                <div class="progress-container">
+                    <span class="time-display" id="currentTime">0:00</span>
+                    <div class="progress-bar" onclick="seek(event)">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span class="time-display" id="totalTime">0:00</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <audio id="audioPlayer"></audio>
+
+    <template id="home-template">
+        <div class="page-header">
+            <h1 class="page-title" id="pageTitle">Welcome</h1>
+            <div class="search-bar">
+                <span class="icon">🔍</span>
+                <input type="search" id="searchInput" placeholder="Search music...">
+                <!-- genre picker button -->
+                <div id="genrePicker">
+                    <button id="genreBtn" class="btn genre-btn">Genres ▾</button>
+                    <div id="genreDropdown" class="genre-dropdown" aria-hidden="true"></div>
+                </div>
+            </div>
+        </div>
+        <div class="music-section">
+            <h2 class="section-title">My Music</h2>
+            <div class="music-grid" id="myMusicGrid"></div>
+        </div>
+        <div class="music-section">
+            <h2 class="section-title">Discover</h2>
+            <div class="music-grid" id="discoverMusicGrid"></div>
+        </div>
+    </template>
+
+    <!-- Edit Track Modal -->
+    <div id="editTrackModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="closeEditModalBtn">×</button>
+            <h2>Edit Track Details</h2>
+            <form id="editTrackForm">
+                <input type="hidden" id="editTrackId">
+                <div class="form-group">
+                    <label for="editTrackTitle">Track Title</label>
+                    <input type="text" id="editTrackTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="editArtistName">Artist Name</label>
+                    <input type="text" id="editArtistName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editAlbum">Album</label>
+                    <input type="text" id="editAlbum">
+                </div>
+                <div class="form-group">
+                    <label for="editGenre">Genre</label>
+                    <input type="text" id="editGenre">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn" id="saveTrackChangesBtn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/env.js"></script>
+    <!-- Load SPA router and prefer an obfuscated home bundle when available -->
+    <script src="spa-router.js"></script>
+    <script>
+        const supabaseUrl = 'https://tqttpbhspgqwniwaokqh.supabase.co'; // Your Supabase URL
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxdHRwYmhzcGdxd25pd2Fva3FoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1MDM2MzksImV4cCI6MjA2NjA3OTYzOX0.q-R66Cb1qYx-0pCkKqy9bBE4BXJwcu4JN8Sv4XsgeiE'; // Your Supabase Anon Key
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // --- GLOBAL VARIABLES & DOM ELEMENTS ---
+        const contentArea = document.getElementById('content-area');
+        const mainNav = document.getElementById('mainNav');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressFill = document.getElementById('progressFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
+        const playerTrackImage = document.getElementById('playerTrackImage');
+        const playerTrackTitle = document.getElementById('playerTrackTitle');
+        const playerTrackArtist = document.getElementById('playerTrackArtist');
+
+        let allTracks = [], myMusic = [], discoverMusic = [], currentPlaylist = [];
+        let originalTracks = []; // keep full dataset fetched at page load
+        let currentTrackIndex = -1, isPlaying = false, currentUser = null;
+        let hasBeenCounted = false;
+
+        // --- SPA ROUTER & PAGE INITIALIZERS ---
+        async function loadPage(pageName) {
+            mainNav.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+            const activeLink = mainNav.querySelector(`[data-page="${pageName}"]`);
+            if (activeLink) activeLink.classList.add('active');
+            contentArea.innerHTML = '<h1>Loading...</h1>';
+            if (pageName === 'home') {
+                contentArea.innerHTML = document.getElementById('home-template').innerHTML;
+                document.getElementById('pageTitle').textContent = `Welcome, ${currentUser.user_metadata.username || 'User'}`;
+                await fetchMusicForHomePage();
+                // populate genre dropdown after we have the tracks
+                populateGenrePicker();
+                // Replace the default handleSearch with a debounced Supabase-backed genre search
+                const input = document.getElementById('searchInput');
+                if (input) {
+                    const debounced = debounce(async (ev) => {
+                        const q = ev.target.value.trim();
+                        if (!q) { handleSearch({ target: { value: '' } }); return; }
+                        // If query looks like a genre search (3+ chars), query Supabase for matching genres
+                        if (q.length >= 255) {
+                            try {
+                                // search title, artist OR genre server-side to avoid missing exact title matches
+                                const orFilter = `track_title.ilike.%${q}% ,artist_name.ilike.%${q}% ,genre.ilike.%${q}%`;
+                                const { data: serverHits, error } = await supabase.from('music').select('*').or(orFilter).order('created_at', { ascending: false });
+                                if (error) throw error;
+                                // render server hits but do not overwrite originalTracks
+                                const hits = serverHits || [];
+                                const hitsMyMusic = hits.filter(t => t.user_id === currentUser.id);
+                                const hitsDiscover = hits.filter(t => t.privacy === 'public');
+                                renderMusicGrids(hitsMyMusic, hitsDiscover);
+                            } catch (err) {
+                                console.error('Search error:', err);
+                            }
+                        } else {
+                            // Fallback to client-side filter using originalTracks
+                            const searchTerm = q.toLowerCase();
+                            const filterFn = track => track.track_title.toLowerCase().includes(searchTerm)
+                                || track.artist_name.toLowerCase().includes(searchTerm)
+                                || (track.genre && track.genre.toLowerCase().includes(searchTerm));
+                            const my = originalTracks.filter(t => t.user_id === currentUser.id).filter(filterFn);
+                            const disc = originalTracks.filter(t => t.privacy === 'public').filter(filterFn);
+                            renderMusicGrids(my, disc);
+                        }
+                    }, 300);
+                    input.addEventListener('input', debounced);
+                }
+
+            } else {
+                try {
+                    const response = await fetch(`content-${pageName}.html`);
+                    if (!response.ok) throw new Error(`Page not found: content-${pageName}.html`);
+                    contentArea.innerHTML = await response.text();
+
+                    if (pageName === 'account') {
+                        initAccountPage(currentUser);
+
+                    }
+                    if (pageName === 'upload') initUploadPage(currentUser);
+                    if (pageName === 'settings') initSettingsPage();
+                } catch (error) {
+                    console.error("Error loading page:", error);
+                    contentArea.innerHTML = `<h1>Error: Could not load page.</h1>`;
+                }
+            }
+        }
+
+        // --- GLOBAL EVENT LISTENER FOR DYNAMIC CONTENT ---
+        document.addEventListener('click', async (e) => {
+            // --- Kebab menu open/close logic ---
+            const kebabButton = e.target.closest('.kebab-menu-button');
+            if (kebabButton) {
+                e.stopPropagation();
+                const menu = kebabButton.nextElementSibling;
+                document.querySelectorAll('.kebab-menu.visible').forEach(m => {
+                    if (m !== menu) m.classList.remove('visible');
+                });
+                menu.classList.toggle('visible');
+                return;
+            }
+
+            if (!e.target.closest('.kebab-menu')) {
+                document.querySelectorAll('.kebab-menu.visible').forEach(menu => menu.classList.remove('visible'));
+            }
+
+            const actionButton = e.target.closest('.kebab-menu-item');
+            if (!actionButton) return;
+
+            const trackId = actionButton.dataset.trackId;
+            const action = actionButton.dataset.action;
+
+            const track = allTracks.find(t => t.id == trackId);
+
+            if (!track) {
+                alert("Could not find track data. Please try refreshing the page.");
+                console.error("Failed to find track with ID:", trackId, "in cached data.");
+                return;
+            }
+
+            switch (action) {
+                case 'edit-track':
+                    openEditModal(track);
+                    break;
+
+                case 'delete-track':
+                    if (!confirm("Are you sure you want to permanently delete this track? This cannot be undone.")) return;
+                    actionButton.disabled = true;
+                    actionButton.innerHTML = `<span>Deleting...</span>`;
+
+                    const { data, error } = await supabase.functions.invoke('delete-track-with-files', {
+                        body: { track_id: track.id }
+                    });
+
+                    if (error) {
+                        const errorMessage = data ? data.error : error.message;
+                        alert('Failed to delete track: ' + errorMessage);
+                        actionButton.disabled = false;
+                        actionButton.innerHTML = `<span>🗑️</span> Delete Track`;
+                    } else {
+                        alert(data.message || 'Track deleted successfully.');
+                        const trackElement = actionButton.closest('.track-item');
+                        if (trackElement) trackElement.remove();
+                        allTracks = allTracks.filter(t => t.id !== track.id);
+                    }
+                    break;
+
+                case 'toggle-privacy':
+                    actionButton.disabled = true;
+                    actionButton.innerHTML = `<span>Updating...</span>`;
+
+                    const { data: toggleData, error: toggleError } = await supabase.functions.invoke('toggle-track-privacy', {
+                        body: { track_id: track.id }
+                    });
+
+                    if (toggleError) {
+                        alert('Failed to update privacy: ' + (toggleData ? toggleData.error : toggleError.message));
+                    } else {
+                        alert(toggleData.message || 'Privacy updated successfully.');
+                    }
+
+                    if (contentArea.querySelector('#accountForm')) {
+                        await initAccountPage(currentUser);
+                    }
+                    break;
+            }
+        });
+
+        // --- HOME PAGE & MUSIC RENDERING ---
+        async function fetchMusicForHomePage() {
+            const { data, error } = await supabase.from('music').select('*').order('created_at', { ascending: false });
+            if (error) { console.error('Error fetching music:', error); return; }
+            originalTracks = data || [];
+            window.originalTracks = originalTracks; // expose for external modules
+            allTracks = originalTracks.slice();
+            myMusic = allTracks.filter(track => track.user_id === currentUser.id);
+            discoverMusic = allTracks.filter(track => track.privacy === 'public');
+            renderMusicGrids(myMusic, discoverMusic);
+        }
+
+        // --- GENRE PICKER WIRING ---
+        function populateGenrePicker() {
+            const dropdown = document.getElementById('genreDropdown');
+            const btn = document.getElementById('genreBtn');
+            if (!dropdown || !btn) return;
+            // collect unique, non-empty genres
+            const genres = Array.from(new Set((originalTracks || []).map(t => (t.genre || '').trim()).filter(Boolean))).sort();
+            dropdown.innerHTML = '';
+            const allItem = document.createElement('button');
+            allItem.className = 'kebab-menu-item';
+            allItem.textContent = 'All genres';
+            allItem.addEventListener('click', () => { dropdown.style.display = 'none'; handleSearch({ target: { value: '' } }); });
+            dropdown.appendChild(allItem);
+            genres.forEach(g => {
+                const b = document.createElement('button');
+                b.className = 'kebab-menu-item';
+                b.textContent = g;
+                b.addEventListener('click', () => {
+                    dropdown.style.display = 'none';
+                    // filter client-side by genre
+                    const my = originalTracks.filter(t => t.user_id === currentUser.id && (t.genre || '').toLowerCase() === g.toLowerCase());
+                    const disc = originalTracks.filter(t => t.privacy === 'public' && (t.genre || '').toLowerCase() === g.toLowerCase());
+                    renderMusicGrids(my, disc);
+                });
+                dropdown.appendChild(b);
+            });
+        }
+
+        // toggle dropdown when clicking the genre button
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest && e.target.closest('#genreBtn');
+            const dropdown = document.getElementById('genreDropdown');
+            if (!dropdown) return;
+            if (btn) {
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                return;
+            }
+            if (!e.target.closest || !e.target.closest('#genrePicker')) {
+                dropdown.style.display = 'none';
+            }
+        });
+        function renderMusicGrids(myMusicList, discoverMusicList) {
+            renderMusicCards(myMusicList, document.getElementById('myMusicGrid'));
+            renderMusicCards(discoverMusicList, document.getElementById('discoverMusicGrid'));
+        }
+        function renderMusicCards(trackList, gridElement) {
+            if (!gridElement) return;
+            gridElement.innerHTML = '';
+            if (!trackList || !trackList.length) { gridElement.innerHTML = '<p style="color: var(--text-light);">No music here.</p>'; return; }
+            trackList.forEach(track => {
+                const coverArtUrl = track.cover_art_path ? supabase.storage.from('cover-art').getPublicUrl(track.cover_art_path).data.publicUrl : null;
+                const card = document.createElement('div');
+                card.className = 'music-card'; card.id = `track-card-${track.id}`;
+                // when clicked, set currentPlaylist to the list currently being rendered so playback indices match
+                card.onclick = (e) => {
+                    if (!e.target.closest('.kebab-menu-button')) {
+                        currentPlaylist = trackList;
+                        playTrack(trackList.findIndex(t => t.id === track.id));
+                    }
+                };
+                card.innerHTML = `<div class="card-image" style="${coverArtUrl ? `background-image: url('${coverArtUrl}');` : ''}">${!coverArtUrl ? '🎵' : ''}<button class="play-button">▶</button></div><div class="card-title">${track.track_title}</div><div class="card-artist">${track.artist_name}</div><div class="card-stats">▶ ${track.play_count.toLocaleString()}</div>`;
+                gridElement.appendChild(card);
+            });
+        }
+        function handleSearch(e) {
+            const searchTerm = (e.target.value || '').toLowerCase();
+            const filterFn = track => track.track_title.toLowerCase().includes(searchTerm)
+                || track.artist_name.toLowerCase().includes(searchTerm)
+                || (track.genre && track.genre.toLowerCase().includes(searchTerm));
+            renderMusicGrids(myMusic.filter(filterFn), discoverMusic.filter(filterFn));
+        }
+
+        // Simple debounce helper
+        function debounce(fn, wait) {
+            let t;
+            return function (...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), wait); };
+        }
+
+        // --- EDIT MODAL LOGIC ---
+        function initializeModal() {
+            const editModal = document.getElementById('editTrackModal');
+            const editForm = document.getElementById('editTrackForm');
+            const closeModalBtn = document.getElementById('closeEditModalBtn');
+
+            if (!editModal || !editForm || !closeModalBtn) {
+                return;
+            }
+
+            closeModalBtn.addEventListener('click', () => {
+                editModal.style.display = 'none';
+            });
+
+            editForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const saveBtn = document.getElementById('saveTrackChangesBtn');
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Saving...';
+
+                const trackId = document.getElementById('editTrackId').value;
+                const updates = {
+                    track_title: document.getElementById('editTrackTitle').value.trim(),
+                    artist_name: document.getElementById('editArtistName').value.trim(),
+                    album: document.getElementById('editAlbum').value.trim(),
+                    genre: document.getElementById('editGenre').value.trim(),
+                };
+
+                const { error } = await supabase.from('music').update(updates).eq('id', trackId);
+
+                if (error) {
+                    alert('Error updating track: ' + error.message);
+                } else {
+                    alert('Track updated successfully!');
+                    editModal.style.display = 'none';
+
+                    const trackIndex = allTracks.findIndex(t => t.id == trackId);
+                    if (trackIndex > -1) {
+                        allTracks[trackIndex] = { ...allTracks[trackIndex], ...updates };
+                    }
+
+                    if (contentArea.querySelector('#accountForm')) {
+                        await initAccountPage(currentUser);
+                    } else {
+                        await fetchMusicForHomePage();
+                    }
+                }
+
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Changes';
+            });
+        }
+
+        function openEditModal(track) {
+            const editModal = document.getElementById('editTrackModal');
+            if (!editModal) {
+                console.error("Cannot open modal because it was not found on the page.");
+                return;
+            }
+            document.getElementById('editTrackId').value = track.id;
+            document.getElementById('editTrackTitle').value = track.track_title;
+            document.getElementById('editArtistName').value = track.artist_name;
+            document.getElementById('editAlbum').value = track.album || '';
+            document.getElementById('editGenre').value = track.genre || '';
+            editModal.style.display = 'flex';
+        }
+
+        // --- PLAYER LOGIC ---
+        async function countPlay() { if (hasBeenCounted || currentTrackIndex === -1) return; hasBeenCounted = true; const track = currentPlaylist[currentTrackIndex]; await supabase.rpc('increment_play_count', { track_id: track.id }); const cardStat = document.querySelector(`#track-card-${track.id} .card-stats`); if (cardStat) cardStat.textContent = `▶ ${(track.play_count + 1).toLocaleString()}`; }
+
+        function playTrack(index) {
+            if (index < 0 || index >= currentPlaylist.length) return;
+            hasBeenCounted = false;
+            currentTrackIndex = index;
+            const track = currentPlaylist[currentTrackIndex];
+            const bucket = track.storage_bucket || 'private-music';
+            const { data } = supabase.storage.from(bucket).getPublicUrl(track.file_path);
+            audioPlayer.src = data.publicUrl;
+            audioPlayer.play();
+            isPlaying = true;
+            updateUI();
+        }
+
+        function togglePlayPause() { if (currentTrackIndex === -1) return; isPlaying ? audioPlayer.pause() : audioPlayer.play(); isPlaying = !isPlaying; updateUI(); }
+        const nextTrack = () => playTrack((currentTrackIndex + 1) % currentPlaylist.length);
+        const previousTrack = () => playTrack((currentTrackIndex - 1 + currentPlaylist.length) % currentPlaylist.length);
+        function seek(event) { if (!audioPlayer.duration) return; const p = event.currentTarget; audioPlayer.currentTime = ((event.clientX - p.getBoundingClientRect().left) / p.offsetWidth) * audioPlayer.duration; }
+        function updateUI() { playPauseBtn.textContent = isPlaying ? '⏸' : '▶'; if (currentTrackIndex === -1) return; const track = currentPlaylist[currentTrackIndex]; playerTrackTitle.textContent = track.track_title; playerTrackArtist.textContent = track.artist_name; const coverArtUrl = track.cover_art_path ? supabase.storage.from('cover-art').getPublicUrl(track.cover_art_path).data.publicUrl : null; playerTrackImage.style.backgroundImage = coverArtUrl ? `url('${coverArtUrl}')` : ''; playerTrackImage.textContent = coverArtUrl ? '' : '🎵'; }
+        const formatTime = (s) => s ? `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}` : '0:00';
+        audioPlayer.addEventListener('timeupdate', () => { if (audioPlayer.duration) { progressFill.style.width = `${(audioPlayer.currentTime / audioPlayer.duration) * 100}%`; currentTimeEl.textContent = formatTime(audioPlayer.currentTime); } if (audioPlayer.currentTime >= 10 && !hasBeenCounted) { countPlay(); } });
+        audioPlayer.addEventListener('loadedmetadata', () => { totalTimeEl.textContent = formatTime(audioPlayer.duration); });
+        audioPlayer.addEventListener('ended', () => { countPlay(); nextTrack(); });
+        playPauseBtn.addEventListener('click', togglePlayPause);
+
+        // --- APP INITIALIZATION ---
+        logoutBtn.addEventListener('click', async () => { await supabase.auth.signOut(); window.location.replace('SignIn.html'); });
+        async function initializeApp() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) { window.location.replace('SignIn.html'); return; }
+            currentUser = user;
+
+
+            initializeModal();
+
+            mainNav.addEventListener('click', (e) => { const link = e.target.closest('a[data-page]'); if (link) { e.preventDefault(); loadPage(link.dataset.page); } });
+            loadPage('home');
+        }
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+
+</html>

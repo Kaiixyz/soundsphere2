@@ -1,0 +1,15 @@
+<div class="container">
+    <div class="page-header"><h1>My Account</h1><p>View and manage your profile and uploaded music.</p></div>
+    <div class="card">
+        <form id="accountForm">
+            <div class="form-group"><label for="email">Email Address</label><input type="email" id="email" disabled /></div>
+            <div class="form-group"><label for="username">Username</label><input type="text" id="username" required /></div>
+            <div class="form-actions"><button type="submit" class="btn">Update Profile</button></div>
+        </form>
+    </div>
+    <div class="card">
+        <h2 class="section-header">My Uploaded Tracks</h2>
+        <div><h3>Public Tracks</h3><ul class="track-list" id="publicTracksList"></ul></div>
+        <div style="margin-top: 2rem;"><h3>Private Tracks</h3><ul class="track-list" id="privateTracksList"></ul></div>
+    </div>
+</div>

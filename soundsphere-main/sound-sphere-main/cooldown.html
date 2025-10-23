@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoundSphere - Login Cooldown</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --text-color: #343a40;
+      --text-light: #6c757d;
+      --border-color: #dee2e6;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --warning-light: #fff3cd;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fa;
+      color: var(--text-color);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    /* --- Main Layout --- */
+    .container { display: flex; height: 100vh; width: 100%; }
+
+    /* --- Left Panel: Visuals --- */
+    .left-panel {
+      flex: 1.2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #ffffff;
+      position: relative;
+      padding: 2rem;
+    }
+    .headset { max-width: 100%; max-height: 80vh; object-fit: contain; }
+    .brand-link { position: absolute; top: 2rem; left: 2.5rem; text-decoration: none; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
+    .logo { width: 40px; height: auto; }
+    .brand-name { font-size: 1.5rem; font-weight: 700; color: #2d9cdb; }
+
+    /* --- Right Panel: Cooldown Message --- */
+    .right-panel {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8f9fa;
+      padding: 2rem;
+    }
+    .cooldown-box {
+      width: 100%;
+      max-width: 400px;
+      padding: 3rem 2.5rem;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      text-align: center;
+      border: 2px solid var(--warning);
+    }
+    .cooldown-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.7;
+    }
+    .cooldown-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #856404;
+    }
+    .cooldown-message {
+      font-size: 1rem;
+      color: var(--text-light);
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+    .cooldown-timer {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--danger);
+      margin: 1rem 0;
+      font-family: 'Courier New', monospace;
+      text-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+    }
+    .cooldown-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin-bottom: 2rem;
+    }
+    .back-to-login {
+      background: var(--primary);
+      color: white;
+      padding: 0.9rem 2rem;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .back-to-login:hover {
+      background-color: #5a4abd;
+    }
+    .back-to-login:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 850px) {
+      .left-panel { display: none; }
+      .right-panel {
+        background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('jason-leung-xR4JHzr69Og-unsplash 1.png');
+        background-size: cover;
+        background-position: center;
+      }
+      .cooldown-box {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(5px);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="container">
+    <section class="left-panel">
+      <a href="index.html" class="brand-link">
+        <div class="brand">
+          <img src="Vector.png" alt="SoundSphere Logo" class="logo" />
+          <span class="brand-name">SoundSphere</span>
+        </div>
+      </a>
+      <img src="jason-leung-xR4JHzr69Og-unsplash 1.png" alt="Headset" class="headset" />
+    </section>
+
+    <section class="right-panel">
+      <div class="cooldown-box">
+        <div class="cooldown-icon">⏱️</div>
+        <h2 class="cooldown-title">Too Many Failed Attempts</h2>
+        <p class="cooldown-message">
+          For security reasons, we've temporarily locked access to the login page.
+          This helps protect your account from unauthorized access attempts.
+        </p>
+        <div class="cooldown-timer" id="cooldownTimer">30</div>
+        <p class="cooldown-subtitle" id="cooldownSubtitle">seconds remaining</p>
+        <p class="cooldown-message">
+          You will be automatically redirected to the login page when the timer expires.
+        </p>
+        <button class="back-to-login" id="backToLoginBtn" disabled style="display: none;">
+          Return to Login
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Get the penalty time from URL parameters or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const penaltyTime = parseInt(urlParams.get('time')) || 30;
+
+    const COOLDOWN_TIME = penaltyTime; // Use the progressive penalty time
+    const STORAGE_KEYS = {
+      FAILED_ATTEMPTS: 'soundsphere_failed_attempts',
+      LAST_FAILED_TIME: 'soundsphere_last_failed_time'
+    };
+
+    // DOM elements
+    const cooldownTimer = document.getElementById('cooldownTimer');
+    const backToLoginBtn = document.getElementById('backToLoginBtn');
+    const cooldownSubtitle = document.getElementById('cooldownSubtitle');
+
+    function getRemainingCooldownTime() {
+      const lastFailedTime = localStorage.getItem(STORAGE_KEYS.LAST_FAILED_TIME);
+      if (!lastFailedTime) return 0;
+
+      const currentTime = Date.now();
+      const timeSinceLastFailure = (currentTime - parseInt(lastFailedTime)) / 1000;
+      return Math.max(0, COOLDOWN_TIME - Math.floor(timeSinceLastFailure));
+    }
+
+    function startCooldownTimer() {
+      let remainingTime = getRemainingCooldownTime();
+
+      const updateTimer = () => {
+        // Format time as MM:SS for penalties over 60 seconds, or SS for shorter ones
+        if (COOLDOWN_TIME >= 60) {
+          const minutes = Math.floor(remainingTime / 60);
+          const seconds = remainingTime % 60;
+          cooldownTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        } else {
+          cooldownTimer.textContent = remainingTime;
+        }
+
+        if (remainingTime <= 0) {
+          // Automatically redirect to login page
+          redirectToLogin();
+          clearInterval(timerInterval);
+          return;
+        }
+
+        remainingTime--;
+      };
+
+      updateTimer(); // Update immediately
+      const timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function redirectToLogin() {
+      window.location.href = 'SignIn.html';
+    }
+
+    // Event listeners
+    backToLoginBtn.addEventListener('click', redirectToLogin);
+
+    // Initialize the display when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set initial timer display format
+      if (COOLDOWN_TIME >= 60) {
+        const minutes = Math.floor(COOLDOWN_TIME / 60);
+        const seconds = COOLDOWN_TIME % 60;
+        cooldownTimer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        cooldownSubtitle.textContent = 'time remaining';
+      } else {
+        cooldownTimer.textContent = COOLDOWN_TIME;
+        cooldownSubtitle.textContent = 'seconds remaining';
+      }
+
+      startCooldownTimer();
+    });
+  </script>
+</body>
+</html>

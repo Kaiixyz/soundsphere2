@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoundSphere - Settings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --sidebar-bg: #ffffff;
+      --primary: #6c5ce7;
+      --primary-light: #e9e7ff;
+      --text-color: #343a40;
+      --text-light: #6c757d;
+      --border-color: #dee2e6;
+      --danger: #dc3545;
+      --danger-light: #f8d7da;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { display: flex; height: 100vh; background: var(--bg-color); overflow: hidden; }
+    
+    aside { width: 220px; background: var(--sidebar-bg); padding: 1.5rem; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); flex-shrink: 0; }
+    .brand { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; }
+    .logo { width: 40px; height: auto; }
+    .brand-name { font-size: 1.25rem; font-weight: 700; color: #2d9cdb; }
+    nav { display: flex; flex-direction: column; gap: 0.5rem; }
+    nav h4 { margin: 1.5rem 0 0.5rem; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase; }
+    nav a { text-decoration: none; color: var(--text-color); padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; border-radius: 8px; transition: all 0.2s ease; font-weight: 500;}
+    nav a.active { background: var(--primary); color: white; font-weight: 600; }
+    nav a:hover:not(.active) { background: var(--bg-color); }
+
+    main { flex: 1; padding: 2.5rem; overflow-y: auto; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .page-header h1 { font-size: 2.25rem; font-weight: 700; color: var(--text-color); }
+    .page-header p { font-size: 1rem; color: var(--text-light); margin-top: 0.25rem; }
+
+    .card { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); margin-top: 2rem; }
+    .card-header { padding-bottom: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); }
+    .card-header h3 { font-size: 1.25rem; }
+    .form-group { display: flex; flex-direction: column; margin-bottom: 1.5rem; }
+    label { margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
+    input { width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; }
+    input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    .form-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
+    .btn { background: var(--primary); color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+    .btn-danger { background-color: var(--danger); }
+    .btn-danger:hover { background-color: #c82333; }
+
+    .danger-zone { border: 1px solid var(--danger); border-radius: 12px; margin-top: 2rem; }
+    .danger-zone .card-header { border-color: var(--danger); background-color: var(--danger-light); padding: 1rem 2rem; border-top-left-radius: 12px; border-top-right-radius: 12px; }
+    .danger-zone .card-header h3 { color: var(--danger); }
+    .danger-zone .content { padding: 2rem; }
+    .danger-zone p { color: var(--text-light); margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="brand"><img src="Vector.png" alt="SoundSphere Logo" class="logo" /><span class="brand-name">SoundSphere</span></div>
+    <nav>
+      <a href="Home.html"><span>🏠</span><span>Home</span></a>
+      <h4>More</h4>
+      <a href="settings.html" class="active"><span>⚙️</span><span>Setting</span></a>
+      <a href="account.html"><span>👤</span><span>Account</span></a>
+      <a href="upload.html"><span>⬆️</span><span>Upload</span></a>
+      <a href="#" id="logoutBtn"><span>🚪</span><span>Logout</span></a>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="container">
+        <div class="page-header">
+            <h1>Settings</h1>
+            <p>Manage your account settings and preferences.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h3>Change Password</h3></div>
+            <form id="passwordForm">
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" required minlength="8" />
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <input type="password" id="confirmPassword" required minlength="8" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn" id="updatePasswordBtn">Update Password</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="danger-zone">
+            <div class="card-header"><h3>Danger Zone</h3></div>
+            <div class="content">
+                <p>Once you delete your account, there is no going back. All of your data, including uploaded music, will be permanently removed.</p>
+                <button class="btn btn-danger" id="deleteAccountBtn">Delete My Account</button>
+            </div>
+        </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseUrl = 'https://tqttpbhspgqwniwaokqh.supabase.co'; 
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxdHRwYmhzcGdxd25pd2Fva3FoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1MDM2MzksImV4cCI6MjA2NjA3OTYzOX0.q-R66Cb1qYx-0pCkKqy9bBE4BXJwcu4JN8Sv4XsgeiE'; // <-- Paste your Supabase Anon Key here
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    const passwordForm = document.getElementById('passwordForm');
+    const updatePasswordBtn = document.getElementById('updatePasswordBtn');
+    const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // Check for logged in user
+    document.addEventListener('DOMContentLoaded', async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            window.location.replace('SignIn.html');
+        }
+    });
+
+    // Handle password update with confirmation
+    passwordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword')?.value || '';
+        updatePasswordBtn.disabled = true;
+
+        if (newPassword !== confirmPassword) {
+            alert('Passwords do not match');
+            updatePasswordBtn.disabled = false;
+            return;
+        }
+        if (newPassword.length < 8) {
+            alert('Password must be at least 8 characters');
+            updatePasswordBtn.disabled = false;
+            return;
+        }
+
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+        if (error) {
+            alert('Error updating password: ' + error.message);
+        } else {
+            alert('Password updated successfully!');
+            passwordForm.reset();
+        }
+        updatePasswordBtn.disabled = false;
+    });
+
+    // Handle account deletion
+    deleteAccountBtn.addEventListener('click', async () => {
+        const confirmation = prompt("This action is irreversible. To confirm, please type 'DELETE' in the box below.");
+        if (confirmation === 'DELETE') {
+            alert('This feature requires server-side logic and is disabled in this demo.');
+        } else {
+            alert('Account deletion cancelled.');
+        }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        window.location.replace('SignIn.html');
+    });
+  </script>
+</body>
+</html>

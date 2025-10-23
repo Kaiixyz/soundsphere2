@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoundSphere - Account</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --sidebar-bg: #ffffff;
+      --primary: #6c5ce7;
+      --primary-light: #e9e7ff;
+      --text-color: #343a40;
+      --text-light: #6c757d;
+      --border-color: #dee2e6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { display: flex; height: 100vh; background: var(--bg-color); overflow: hidden; }
+    
+    /* --- Sidebar  --- */
+    aside { width: 220px; background: var(--sidebar-bg); padding: 1.5rem; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); flex-shrink: 0; }
+    .brand { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; }
+    .logo { width: 40px; height: auto; }
+    .brand-name { font-size: 1.25rem; font-weight: 700; color: #2d9cdb; }
+    nav { display: flex; flex-direction: column; gap: 0.5rem; }
+    nav h4 { margin: 1.5rem 0 0.5rem; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase; }
+    nav a { text-decoration: none; color: var(--text-color); padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; border-radius: 8px; transition: all 0.2s ease; font-weight: 500;}
+    nav a.active { background: var(--primary); color: white; font-weight: 600; }
+    nav a:hover:not(.active) { background: var(--bg-color); }
+    
+    /* --- Main Content & Layout --- */
+    main { flex: 1; padding: 2.5rem; overflow-y: auto; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .page-header h1 { font-size: 2.25rem; font-weight: 700; color: var(--text-color); }
+    .page-header p { font-size: 1rem; color: var(--text-light); margin-top: 0.25rem; }
+
+    .card { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); margin-top: 2rem; }
+    .form-group { display: flex; flex-direction: column; margin-bottom: 1.5rem; }
+    label { margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
+    input { width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; }
+    input:disabled { background-color: #f1f3f5; }
+    .form-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
+    .btn { background: var(--primary); color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+    /* --- CSS FOR UPLOADED TRACKS SECTION --- */
+    .section-header {
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+    .track-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .track-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+    }
+    .track-item:hover {
+        background-color: var(--bg-color);
+    }
+    .track-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .track-icon {
+        font-size: 1.5rem;
+        color: var(--primary);
+    }
+    .track-title {
+        font-weight: 500;
+        color: var(--text-color);
+    }
+    .track-artist {
+        font-size: 0.9rem;
+        color: var(--text-light);
+    }
+    .no-tracks-message {
+        padding: 1rem;
+        color: var(--text-light);
+        text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="brand"><img src="Vector.png" alt="SoundSphere Logo" class="logo" /><span class="brand-name">SoundSphere</span></div>
+    <nav>
+      <a href="Home.html"><span>🏠</span><span>Home</span></a>
+      <h4>More</h4>
+      <a href="settings.html"><span>⚙️</span><span>Setting</span></a>
+      <a href="account.html" class="active"><span>👤</span><span>Account</span></a>
+      <a href="upload.html"><span>⬆️</span><span>Upload</span></a>
+      <a href="#" id="logoutBtn"><span>🚪</span><span>Logout</span></a>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="container">
+        <div class="page-header">
+            <h1>My Account</h1>
+            <p>View and manage your profile and uploaded music.</p>
+        </div>
+        
+        <!-- Profile Update Card -->
+        <div class="card">
+            <form id="accountForm">
+                <div class="form-group"><label for="email">Email Address</label><input type="email" id="email" disabled /></div>
+                <div class="form-group"><label for="username">Username</label><input type="text" id="username" required /></div>
+                <div class="form-actions"><button type="submit" class="btn" id="updateBtn">Update Profile</button></div>
+            </form>
+        </div>
+
+        <!-- UPLOADED TRACKS SECTION -->
+        <div class="card">
+            <h2 class="section-header">My Uploaded Tracks</h2>
+            
+            <div>
+                <h3>Public Tracks</h3>
+                <ul class="track-list" id="publicTracksList">
+                    <!-- Public tracks will be injected here by JS -->
+                </ul>
+            </div>
+            
+            <div style="margin-top: 2rem;">
+                <h3>Private Tracks</h3>
+                <ul class="track-list" id="privateTracksList">
+                    <!-- Private tracks will be injected here by JS -->
+                </ul>
+            </div>
+        </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!--
+    env.js should set window.SUPABASE_ANON_KEY before loading the app script.
+    In production you should inject the anon key from a server-side template or serve a generated env file
+    that is NOT checked into source control (see README for instructions).
+  -->
+  <script src="assets/js/env.js"></script>
+  <script>
+    // Attempt to load an obfuscated bundle first (assets/js/account.obf.js).
+    // If it's not present, fall back to the readable source (assets/js/account.js).
+    (function () {
+      var obf = document.createElement('script');
+      obf.src = 'assets/js/account.obf.js';
+      obf.onerror = function () {
+        var s = document.createElement('script');
+        s.src = 'assets/js/account.js';
+        document.head.appendChild(s);
+      };
+      document.head.appendChild(obf);
+    })();
+  </script>
+</body>
+</html>

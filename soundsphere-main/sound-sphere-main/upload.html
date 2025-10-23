@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoundSphere - Upload Track</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    
+    :root {
+      --bg-color: #f8f9fa;
+      --sidebar-bg: #ffffff;
+      --primary: #6c5ce7;
+      --primary-light: #e9e7ff;
+      --text-color: #343a40;
+      --text-light: #6c757d;
+      --border-color: #dee2e6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { display: flex; height: 100vh; background: var(--bg-color); overflow: hidden; }
+    
+    aside { width: 220px; background: var(--sidebar-bg); padding: 1.5rem; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); flex-shrink: 0; }
+    .brand { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; }
+    .logo { width: 40px; height: auto; }
+    .brand-name { font-size: 1.25rem; font-weight: 700; color: #2d9cdb; }
+    nav { display: flex; flex-direction: column; gap: 0.5rem; }
+    nav h4 { margin: 1.5rem 0 0.5rem; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase; }
+    nav a { text-decoration: none; color: var(--text-color); padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; border-radius: 8px; font-weight: 500; transition: all 0.2s ease;}
+    nav a.active { background: var(--primary); color: white; font-weight: 600; }
+    nav a:hover:not(.active) { background: var(--bg-color); }
+    
+    main { flex: 1; padding: 2.5rem; overflow-y: auto; }
+    .upload-page-container { max-width: 1000px; margin: 0 auto; }
+    .page-header { margin-bottom: 2rem; }
+    .page-header h1 { font-size: 2.25rem; font-weight: 700; color: var(--text-color); }
+    .page-header p { font-size: 1rem; color: var(--text-light); margin-top: 0.25rem; }
+
+    .upload-form-card { display: grid; grid-template-columns: 320px 1fr; gap: 2.5rem; background: #fff; padding: 2rem; border-radius: 16px; border: 1px solid var(--border-color); }
+    .upload-column-left { display: flex; flex-direction: column; }
+    .upload-dropzone { flex-grow: 1; border: 2px dashed var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s ease-in-out; display: flex; align-items: center; justify-content: center; padding: 1rem; background-color: #fff; }
+    .upload-dropzone:hover, .upload-dropzone.dragover { border-color: var(--primary); background-color: var(--primary-light); }
+    .dropzone-content { text-align: center; }
+    .dropzone-icon { color: var(--primary); width: 48px; height: 48px; stroke-width: 1; }
+    .dropzone-text-primary { font-weight: 600; color: var(--primary); margin-top: 0.5rem; }
+    .dropzone-text-secondary { font-size: 0.9rem; color: var(--text-light); margin-top: 0.25rem; }
+    .dropzone-file-info { font-size: 0.8rem; color: var(--text-color); margin-top: 1rem; font-weight: 500; }
+    #fileInput { display: none; }
+    .cover-art-preview-area { margin-top: 1.5rem; }
+    .cover-art-preview-area label { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; display: block; }
+    .cover-art-preview { width: 100%; padding-bottom: 100%; border-radius: 8px; background-color: #e9ecef; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--text-light); }
+    .progress-bar { width: 100%; height: 8px; background-color: #e9ecef; border-radius: 4px; overflow: hidden; display: none; margin-top: 1.5rem; }
+    .progress-fill { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.3s ease; }
+    .upload-column-right { display: flex; flex-direction: column; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .form-row, .form-group { margin-bottom: 1.5rem; }
+    label { margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
+    input, select { width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
+    input[type="file"] { padding: 0.2rem; }
+    input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    .dynamic-field { display: none; }
+    .form-actions { margin-top: auto; padding-top: 1.5rem; display: flex; justify-content: flex-end; }
+    .btn { background: var(--primary); color: #fff; padding: 0.85rem 2rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; transition: background-color 0.2s ease; }
+    .btn:hover { background: #5a4abd; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    @media (max-width: 900px) { .upload-form-card { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="brand"><img src="Vector.png" alt="SoundSphere Logo" class="logo" /><span class="brand-name">SoundSphere</span></div>
+    <nav>
+      <a href="Home.html"><span>🏠</span><span>Home</span></a>
+      <h4>More</h4>
+      <a href="settings.html"><span>⚙️</span><span>Setting</span></a>
+      <a href="account.html"><span>👤</span><span>Account</span></a>
+      <a href="upload.html" class="active"><span>⬆️</span><span>Upload</span></a>
+      <a href="#" id="logoutBtn"><span>🚪</span><span>Logout</span></a>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="upload-page-container">
+        <div class="page-header">
+            <h1>Upload Track</h1>
+            <p>Add a new song to your SoundSphere library.</p>
+        </div>
+        <form class="upload-form-card" id="uploadForm">
+            <div class="upload-column-left">
+                <label for="fileInput" class="upload-dropzone" id="uploadBox">
+                    <div class="dropzone-content">
+                        <svg class="dropzone-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                        <p class="dropzone-text-primary">Click to upload</p>
+                        <p class="dropzone-text-secondary">or drag and drop</p>
+                        <p class="dropzone-file-info" id="fileInfo">No file selected</p>
+                    </div>
+                </label>
+                <input type="file" id="fileInput" accept="audio/*" required/>
+                <div class="cover-art-preview-area">
+                    <label>Cover Art Preview</label>
+                    <div class="cover-art-preview" id="coverArtPreview"><span class="preview-placeholder">🖼️</span></div>
+                </div>
+                <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+            </div>
+            <div class="upload-column-right">
+                <!-- PLACEHOLDERS -->
+                <div class="form-group"><label for="trackTitle">Track title*</label><input type="text" id="trackTitle" placeholder="Enter track name" required /></div>
+                <div class="form-group"><label for="artistName">Artist name*</label><input type="text" id="artistName" placeholder="Enter artist name" required /></div>
+                <div class="form-row">
+                    <div class="form-group"><label for="genre">Genre</label><select id="genre"><option>Pop</option><option>Rock</option><option>Hip-hop</option><option>Electronic</option><option>Other</option></select></div>
+                    <div class="form-group"><label for="album">Album</label><input type="text" id="album" placeholder="Album name (optional)" /></div>
+                </div>
+                <div class="form-group dynamic-field" id="otherGenreGroup"><label for="otherGenre">Please specify genre</label><input type="text" id="otherGenre" placeholder="Your custom genre" /></div>
+                <div class="form-group"><label for="coverArt">Album cover art</label><input type="file" id="coverArt" accept="image/*" /></div>
+                <div class="form-row">
+                    <div class="form-group"><label for="tags">Tags</label><input type="text" id="tags" placeholder="e.g. chill, summer, acoustic" /></div>
+                    <div class="form-group"><label for="privacy">Privacy*</label><select id="privacy" required><option value="public">Public</option><option value="private">Private</option></select></div>
+                </div>
+                <div class="form-actions"><button type="submit" class="btn" id="uploadBtn">Save and Upload</button></div>
+            </div>
+        </form>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    
+    const supabaseUrl = 'https://tqttpbhspgqwniwaokqh.supabase.co'; 
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxdHRwYmhzcGdxd25pd2Fva3FoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1MDM2MzksImV4cCI6MjA2NjA3OTYzOX0.q-R66Cb1qYx-0pCkKqy9bBE4BXJwcu4JN8Sv4XsgeiE'; 
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const progressFill = document.getElementById('progressFill');
+    const progressBar = document.getElementById('progressBar');
+    const uploadBox = document.getElementById('uploadBox');
+    const genreSelect = document.getElementById('genre');
+    const otherGenreGroup = document.getElementById('otherGenreGroup');
+    const otherGenreInput = document.getElementById('otherGenre');
+    const coverArtInput = document.getElementById('coverArt');
+    const coverArtPreview = document.getElementById('coverArtPreview');
+    
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            alert('You must be logged in to upload music.');
+            window.location.replace('SignIn.html');
+        } else {
+            currentUser = session.user;
+        }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        window.location.replace('SignIn.html');
+    });
+
+    uploadBox.addEventListener('dragover', (e) => { e.preventDefault(); uploadBox.classList.add('dragover'); });
+    uploadBox.addEventListener('dragleave', () => { uploadBox.classList.remove('dragover'); });
+    uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadBox.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            handleFileSelect();
+        }
+    });
+
+    fileInput.addEventListener('change', handleFileSelect);
+    function handleFileSelect() {
+        const file = fileInput.files[0];
+        if (file) { fileInfo.textContent = file.name; }
+    }
+    
+    coverArtInput.addEventListener('change', () => {
+        const file = coverArtInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                coverArtPreview.style.backgroundImage = `url('${e.target.result}')`;
+                coverArtPreview.querySelector('.preview-placeholder').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    genreSelect.addEventListener('change', () => {
+        if (genreSelect.value === 'Other') {
+            otherGenreGroup.style.display = 'block';
+            otherGenreInput.required = true;
+        } else {
+            otherGenreGroup.style.display = 'none';
+            otherGenreInput.required = false;
+        }
+    });
+
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentUser) { alert('Authentication error. Please log in again.'); return; }
+        const audioFile = fileInput.files[0];
+        if (!audioFile) { alert('Please select an audio file.'); return; }
+        
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = 'Uploading...';
+        progressBar.style.display = 'block';
+
+        try {
+            let finalGenre = genreSelect.value;
+            if (finalGenre === 'Other') { finalGenre = otherGenreInput.value.trim(); }
+            if (!finalGenre) { throw new Error("Genre is required."); }
+
+            const timestamp = Date.now();
+            let coverArtPath = null;
+            if (coverArtInput.files[0]) {
+                const coverArtFile = coverArtInput.files[0];
+                const { data, error } = await supabase.storage.from('cover-art').upload(`${currentUser.id}/${timestamp}_${coverArtFile.name}`, coverArtFile);
+                if (error) throw error;
+                coverArtPath = data.path;
+            }
+            progressFill.style.width = '30%';
+
+            const { data: audioData, error: audioError } = await supabase.storage.from('music-files').upload(`${currentUser.id}/${timestamp}_${audioFile.name}`, audioFile);
+            if (audioError) throw audioError;
+            progressFill.style.width = '70%';
+
+            const { error: insertError } = await supabase.from('music').insert([{
+                user_id: currentUser.id,
+                track_title: document.getElementById('trackTitle').value,
+                artist_name: document.getElementById('artistName').value,
+                genre: finalGenre,
+                album: document.getElementById('album').value,
+                tags: document.getElementById('tags').value,
+                privacy: document.getElementById('privacy').value,
+                file_path: audioData.path,
+                cover_art_path: coverArtPath
+            }]);
+            if (insertError) throw insertError;
+            
+            progressFill.style.width = '100%';
+            alert('Track uploaded successfully!');
+            // window.location.href = 'upload.html';
+        } catch (error) {
+            alert('Upload failed: ' + error.message);
+        } finally {
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = 'Save and Upload';
+            progressBar.style.display = 'none';
+            progressFill.style.width = '0%';
+        }
+    });
+  </script>
+</body>
+</html>

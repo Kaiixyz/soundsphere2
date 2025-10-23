@@ -1,0 +1,12 @@
+{
+  "name": "sound-sphere-web",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "javascript-obfuscator": "^4.0.0"
+  },
+  "scripts": {
+    "obfuscate": "javascript-obfuscator assets/js/account.js --output assets/js/account.obf.js --compact true --control-flow-flattening true --string-array true --string-array-encoding base64 --self-defending true",
+    "test": "node test/mfa-utils.test.js"
+  }
+}

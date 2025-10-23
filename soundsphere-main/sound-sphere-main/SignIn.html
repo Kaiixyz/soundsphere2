@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoundSphere Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --text-color: #343a40;
+      --text-light: #6c757d;
+      --border-color: #dee2e6;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --success: #28a745;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fa;
+      color: var(--text-color);
+      overflow: hidden;
+    }
+    
+    /* --- Main Layout --- */
+    .container { display: flex; height: 100vh; }
+
+    /* --- Left Panel: Visuals --- */
+    .left-panel { flex: 1.2; display: flex; align-items: center; justify-content: center; background-color: #ffffff; position: relative; padding: 2rem; }
+    .headset { max-width: 100%; max-height: 80vh; object-fit: contain; }
+    .brand-link { position: absolute; top: 2rem; left: 2.5rem; text-decoration: none; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
+    .logo { width: 40px; height: auto; }
+    .brand-name { font-size: 1.5rem; font-weight: 700; color: #2d9cdb; }
+
+    /* --- Right Panel: Form --- */
+    .right-panel { flex: 1; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa; padding: 2rem; }
+    .login-box { width: 100%; max-width: 400px; padding: 2.5rem; background: #ffffff; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+    .login-title { text-align: left; font-size: 1.8rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .login-subtitle { text-align: left; color: var(--text-light); margin-bottom: 2.5rem; }
+    .input-group { margin-bottom: 1.5rem; }
+    label { display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-color); }
+    .input-field { display: flex; align-items: center; background-color: #f8f9fa; border: 1px solid var(--border-color); border-radius: 10px; padding-left: 1rem; }
+    .input-field input { width: 100%; padding: 0.9rem 0.5rem; border: none; outline: none; background: transparent; font-size: 1rem; }
+    .toggle-password { cursor: pointer; font-size: 1.2rem; padding: 0.5rem; color: var(--text-light); }
+    .login-btn { width: 100%; padding: 0.9rem; border: none; background: var(--primary); color: white; font-weight: 600; font-size: 1rem; border-radius: 10px; cursor: pointer; transition: background-color 0.3s ease; margin-top: 1rem; }
+    .login-btn:hover { background-color: #5a4abd; }
+    .login-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+    .register-text { text-align: center; font-size: 0.9rem; margin-top: 1.5rem; color: var(--text-light); }
+    .register-text a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+    /* Security feature styles */
+    .attempt-info { text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--text-light); }
+    .attempt-warning { color: var(--danger); font-weight: 500; }
+    .cooldown-message { background-color: rgba(255, 193, 7, 0.1); border: 1px solid var(--warning); border-radius: 8px; padding: 1rem; margin-top: 1rem; text-align: center; }
+    .cooldown-message h3 { color: var(--warning); margin-bottom: 0.5rem; }
+    .cooldown-timer { font-size: 1.5rem; font-weight: 700; color: var(--danger); }
+    .error-message { background-color: rgba(220, 53, 69, 0.1); border: 1px solid var(--danger); border-radius: 8px; padding: 0.75rem; margin-top: 1rem; color: var(--danger); text-align: center; }
+    .success-message { background-color: rgba(40, 167, 69, 0.1); border: 1px solid var(--success); border-radius: 8px; padding: 0.75rem; margin-top: 1rem; color: var(--success); text-align: center; }
+
+    @media (max-width: 850px) {
+      .left-panel { display: none; }
+      .right-panel { background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('jason-leung-xR4JHzr69Og-unsplash 1.png'); background-size: cover; background-position: center; }
+      .login-box { background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); }
+    }
+    
+    /* Style to hide the container while checking auth state */
+    .hidden {
+        display: none !important;
+    }
+
+    /* --- Cooldown Modal Styles --- */
+    .cooldown-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .cooldown-modal-content {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 3rem 2.5rem;
+      max-width: 450px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 2px solid var(--warning);
+      animation: slideIn 0.4s ease-out;
+    }
+
+    .cooldown-modal-header {
+      margin-bottom: 2rem;
+    }
+
+    .cooldown-modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .cooldown-modal-content .cooldown-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.8;
+      animation: pulse 2s infinite;
+    }
+
+    .cooldown-modal-content .cooldown-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--warning);
+      margin: 0;
+    }
+
+    .cooldown-modal-content .cooldown-timer {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--danger);
+      font-family: 'Courier New', monospace;
+      text-shadow: 0 2px 8px var(--danger);
+      animation: timerGlow 1s ease-in-out infinite alternate;
+    }
+
+    .cooldown-modal-content .cooldown-subtitle {
+      font-size: 1rem;
+      color: var(--text-light);
+      margin: 0;
+    }
+
+    .cooldown-modal-content .cooldown-message {
+      font-size: 1rem;
+      color: var(--text-light);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    /* Timer glow animation using CSS variables */
+    @keyframes timerGlow {
+      from {
+        text-shadow: 0 2px 8px var(--danger);
+      }
+      to {
+        text-shadow: 0 2px 16px var(--danger);
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <main class="container hidden" id="authContainer">
+    <section class="left-panel">
+      <a href="index.html" class="brand-link">
+        <div class="brand">
+          <img src="Vector.png" alt="SoundSphere Logo" class="logo" />
+          <span class="brand-name">SoundSphere</span>
+        </div>
+      </a>
+      <img src="jason-leung-xR4JHzr69Og-unsplash 1.png" alt="Headset" class="headset" />
+    </section>
+
+    <section class="right-panel">
+      <div class="login-box">
+        <h2 class="login-title">Welcome Back</h2>
+        <p class="login-subtitle">Sign in to access your library.</p>
+        <form id="loginForm">
+          <div class="input-group">
+            <label for="email">Email Address</label>
+            <div class="input-field">
+              <input type="email" id="email" placeholder="you@example.com" required />
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="password">Password</label>
+            <div class="input-field">
+              <input type="password" id="password" placeholder="••••••••" required />
+              <span class="toggle-password">👁️</span>
+            </div>
+          </div>
+          <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
+        </form>
+
+        <!-- Security feature elements -->
+        <div id="attemptInfo" class="attempt-info" style="display: none;">
+          <span id="attemptCount"></span>
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div id="successMessage" class="success-message" style="display: none;"></div>
+
+        <p class="register-text">Don't have an account? <a href="register.html">Sign up</a></p>
+      </div>
+    </section>
+  </main>
+
+  
+  <div id="loadingIndicator" style="display: flex; align-items: center; justify-content: center; height: 100vh; font-size: 1.5rem; font-weight: 500;">Loading...</div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/mfa-utils.js"></script>
+  <script>
+    const supabaseUrl = 'https://tqttpbhspgqwniwaokqh.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxdHRwYmhzcGdxd25pd2Fva3FoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1MDM2MzksImV4cCI6MjA2NjA3OTYzOX0.q-R66Cb1qYx-0pCkKqy9bBE4BXJwcu4JN8Sv4XsgeiE'; // <-- Paste your Supabase Anon Key here
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // --- SECURITY FEATURE VARIABLES ---
+    const MAX_ATTEMPTS = 3;
+    const STORAGE_KEYS = {
+      FAILED_ATTEMPTS: 'soundsphere_failed_attempts',
+      LAST_FAILED_TIME: 'soundsphere_last_failed_time',
+      TOTAL_FAILED_ATTEMPTS: 'soundsphere_total_failed_attempts'
+    };
+
+    // Calculate penalty time based on total failed attempts
+    function getPenaltyTime() {
+      const totalAttempts = getTotalFailedAttempts();
+      if (totalAttempts >= 9) {
+        return 120; // 2 minutes for 9+ attempts
+      } else if (totalAttempts >= 6) {
+        return 60; // 1 minute for 6-8 attempts
+      } else if (totalAttempts >= 3) {
+        return 30; // 30 seconds for 3-5 attempts
+      } else {
+        return 0; // No penalty for less than 3 attempts
+      }
+    }
+
+    // --- DOM ELEMENTS ---
+    const authContainer = document.getElementById('authContainer');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const attemptInfo = document.getElementById('attemptInfo');
+    const attemptCount = document.getElementById('attemptCount');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+
+    // --- SECURITY FUNCTIONS ---
+    function getFailedAttempts() {
+      const attempts = localStorage.getItem(STORAGE_KEYS.FAILED_ATTEMPTS);
+      return attempts ? parseInt(attempts) : 0;
+    }
+
+    function setFailedAttempts(count) {
+      localStorage.setItem(STORAGE_KEYS.FAILED_ATTEMPTS, count.toString());
+    }
+
+    function getLastFailedTime() {
+      const time = localStorage.getItem(STORAGE_KEYS.LAST_FAILED_TIME);
+      return time ? parseInt(time) : 0;
+    }
+
+    function setLastFailedTime(time) {
+      localStorage.setItem(STORAGE_KEYS.LAST_FAILED_TIME, time.toString());
+    }
+
+    function getTotalFailedAttempts() {
+      const attempts = localStorage.getItem(STORAGE_KEYS.TOTAL_FAILED_ATTEMPTS);
+      return attempts ? parseInt(attempts) : 0;
+    }
+
+    function setTotalFailedAttempts(count) {
+      localStorage.setItem(STORAGE_KEYS.TOTAL_FAILED_ATTEMPTS, count.toString());
+    }
+
+    function resetFailedAttempts() {
+      localStorage.removeItem(STORAGE_KEYS.FAILED_ATTEMPTS);
+      localStorage.removeItem(STORAGE_KEYS.LAST_FAILED_TIME);
+      localStorage.removeItem(STORAGE_KEYS.TOTAL_FAILED_ATTEMPTS);
+    }
+
+    function isInCooldown() {
+      // Check if modal is currently visible
+      const modal = document.getElementById('cooldownModal');
+      if (modal) {
+        return true;
+      }
+
+      // Check if user is in cooldown period based on time
+      const lastFailedTime = getLastFailedTime();
+      const currentTime = Date.now();
+      const timeSinceLastFailure = (currentTime - lastFailedTime) / 1000; // Convert to seconds
+      const penaltyTime = getPenaltyTime();
+      // Only check cooldown if there's actually a penalty time
+      return penaltyTime > 0 && timeSinceLastFailure < penaltyTime;
+    }
+
+    function getRemainingCooldownTime() {
+      const lastFailedTime = getLastFailedTime();
+      const currentTime = Date.now();
+      const timeSinceLastFailure = (currentTime - lastFailedTime) / 1000;
+      const penaltyTime = getPenaltyTime();
+      return Math.max(0, penaltyTime - Math.floor(timeSinceLastFailure));
+    }
+
+    function updateAttemptDisplay() {
+      const attempts = getFailedAttempts();
+      const remainingAttempts = MAX_ATTEMPTS - attempts;
+
+      if (attempts > 0 && attempts < MAX_ATTEMPTS) {
+        attemptCount.textContent = `${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining`;
+        attemptCount.className = remainingAttempts <= 1 ? 'attempt-warning' : '';
+        attemptInfo.style.display = 'block';
+      } else {
+        attemptInfo.style.display = 'none';
+      }
+    }
+
+    function showCooldownMessage() {
+      // Check if modal is already visible to prevent multiple modals
+      const existingModal = document.getElementById('cooldownModal');
+      if (existingModal) {
+        return; // Modal already exists, don't create another one
+      }
+
+      // Show cooldown modal overlay instead of redirecting
+      const penaltyTime = getPenaltyTime();
+      showCooldownModal(penaltyTime);
+    }
+
+    function showCooldownModal(penaltyTime) {
+      // Create modal HTML
+      const modalHTML = `
+        <div id="cooldownModal" class="cooldown-modal-overlay">
+          <div class="cooldown-modal-content">
+            <div class="cooldown-modal-header">
+              <div class="cooldown-icon">⏱️</div>
+              <h2 class="cooldown-title">Too Many Failed Attempts</h2>
+            </div>
+            <div class="cooldown-modal-body">
+              <p class="cooldown-message">
+                For security reasons, we've temporarily locked access to the login page.
+                This helps protect your account from unauthorized access attempts.
+              </p>
+              <div class="cooldown-timer" id="modalCooldownTimer">${Math.floor(penaltyTime / 60)}:${(penaltyTime % 60).toString().padStart(2, '0')}</div>
+              <p class="cooldown-subtitle" id="modalCooldownSubtitle">${penaltyTime >= 60 ? 'time remaining' : 'seconds remaining'}</p>
+              <p class="cooldown-message">
+                You will be able to try again when the timer expires.
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Add modal to page
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+      // Start countdown timer
+      startModalCooldownTimer(penaltyTime);
+
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+    }
+
+    function startModalCooldownTimer(penaltyTime) {
+      let remainingTime = penaltyTime;
+      const timerElement = document.getElementById('modalCooldownTimer');
+      const subtitleElement = document.getElementById('modalCooldownSubtitle');
+
+      const updateTimer = () => {
+        // Format time as MM:SS for penalties over 60 seconds, or SS for shorter ones
+        if (penaltyTime >= 60) {
+          const minutes = Math.floor(remainingTime / 60);
+          const seconds = remainingTime % 60;
+          timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        } else {
+          timerElement.textContent = remainingTime;
+        }
+
+        if (remainingTime <= 0) {
+          // Hide modal and reset failed attempts to allow new login attempts
+          hideCooldownModal();
+          resetFailedAttempts();
+          clearInterval(timerInterval);
+          return;
+        }
+
+        remainingTime--;
+      };
+
+      updateTimer(); // Update immediately
+      const timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function hideCooldownModal() {
+      const modal = document.getElementById('cooldownModal');
+      if (modal) {
+        modal.remove();
+      }
+      // Restore body scroll
+      document.body.style.overflow = '';
+    }
+
+    // Prevent modal from closing when clicking outside
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('cooldownModal');
+      if (modal && e.target === modal) {
+        e.stopPropagation();
+      }
+    });
+
+    // Prevent escape key from closing modal
+    document.addEventListener('keydown', function(e) {
+      const modal = document.getElementById('cooldownModal');
+      if (modal && e.key === 'Escape') {
+        e.stopPropagation();
+      }
+    });
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      successMessage.style.display = 'none'; // Hide success message if showing
+      setTimeout(() => {
+        errorMessage.style.display = 'none';
+      }, 5000);
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.style.display = 'block';
+      errorMessage.style.display = 'none'; // Hide error message if showing
+      setTimeout(() => {
+        successMessage.style.display = 'none';
+      }, 3000);
+    }
+
+    // --- AUTH FLOW SCRIPT ---
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session ? 'User logged in' : 'User logged out');
+
+      if (event === 'SIGNED_IN' && session) {
+        // User successfully logged in
+        console.log('User signed in successfully');
+        resetFailedAttempts();
+        // Small delay to show success state before redirect
+        setTimeout(() => {
+          window.location.replace('Home.html');
+        }, 500);
+      } else if (event === 'SIGNED_OUT') {
+        // User signed out
+        console.log('User signed out');
+        loadingIndicator.style.display = 'none';
+        authContainer.classList.remove('hidden');
+        updateAttemptDisplay();
+      } else if (event === 'TOKEN_REFRESHED') {
+        // Token was refreshed
+        console.log('Token refreshed');
+      } else {
+        // Initial load or other states
+        if (!session) {
+          // No active session, show login form
+          loadingIndicator.style.display = 'none';
+          authContainer.classList.remove('hidden');
+          updateAttemptDisplay();
+        }
+      }
+    });
+
+    // Event listeners for the form itself
+    document.querySelector('.toggle-password').addEventListener('click', function () {
+      const passwordField = document.getElementById('password');
+      passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+      this.textContent = passwordField.type === 'password' ? '👁️' : '🙈';
+    });
+
+    // Enhanced login form handler with security features
+    loginForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      // Clear any previous error messages
+      errorMessage.style.display = 'none';
+
+      // Check if user is in cooldown period
+      if (isInCooldown()) {
+        showCooldownMessage();
+        return;
+      }
+
+      // Validate form inputs
+      const emailValue = email.value.trim();
+      const passwordValue = password.value.trim();
+
+      if (!emailValue || !passwordValue) {
+        showError('Please fill in all fields.');
+        return;
+      }
+
+      if (!isValidEmail(emailValue)) {
+        showError('Please enter a valid email address.');
+        return;
+      }
+
+      // Disable form during login attempt
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Signing In...';
+      email.disabled = true;
+      password.disabled = true;
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: emailValue,
+          password: passwordValue
+        });
+
+        if (error) {
+          // Login failed - increment failed attempts
+          const currentAttempts = getFailedAttempts();
+          const newAttempts = currentAttempts + 1;
+          const totalAttempts = getTotalFailedAttempts();
+          const newTotalAttempts = totalAttempts + 1;
+
+          setFailedAttempts(newAttempts);
+          setTotalFailedAttempts(newTotalAttempts);
+          setLastFailedTime(Date.now());
+
+          if (newAttempts >= MAX_ATTEMPTS) {
+            // User has exceeded max attempts in current session - trigger cooldown
+            const penaltyTime = getPenaltyTime();
+            if (penaltyTime > 0) {
+              // Show cooldown message with progressive penalty based on total historical attempts
+              showCooldownMessage();
+              showError(`Too many failed attempts. Please wait ${Math.floor(penaltyTime / 60)}:${(penaltyTime % 60).toString().padStart(2, '0')} before trying again.`);
+            } else {
+              // Reset attempts if no penalty (shouldn't happen with current logic)
+              resetFailedAttempts();
+              showError(`Login failed: ${error.message}. Please try again.`);
+            }
+          } else {
+            // Show remaining attempts in current session
+            const remainingAttempts = MAX_ATTEMPTS - newAttempts;
+            showError(`Login failed: ${error.message}. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining.`);
+            updateAttemptDisplay();
+          }
+        } else {
+          // Login successful - show success message and reset failed attempts counter
+          resetFailedAttempts();
+          showSuccess('Login successful! Redirecting...');
+
+          // Clear form inputs
+          email.value = '';
+          password.value = '';
+
+          // The auth state change handler will redirect the user
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        showError('Network error occurred. Please check your connection and try again.');
+      } finally {
+        // Re-enable login button and form inputs
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Sign In';
+        email.disabled = false;
+        password.disabled = false;
+      }
+    });
+
+    // Email validation helper function
+    function isValidEmail(email) {
+      // Prefer shared util when available
+      if (window.MFA_UTILS && typeof window.MFA_UTILS.isValidEmail === 'function') return window.MFA_UTILS.isValidEmail(email);
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
+    // Initialize attempt display when page loads
+    document.addEventListener('DOMContentLoaded', async function() {
+      updateAttemptDisplay();
+
+      // Check if user is already logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        console.log('User already logged in, redirecting to home');
+        window.location.replace('Home.html');
+      }
+    });
+
+    // --- MFA OTP Modal Helpers ---
+    function showOtpModal(challengeContext) {
+      // if modal exists, reuse
+      if (document.getElementById('mfaModal')) return;
+      const html = `
+        <div id="mfaModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:2000;">
+          <div style="background:#fff;padding:1.25rem;border-radius:12px;max-width:360px;width:90%;">
+            <h3 style="margin:0 0 0.5rem">Two-factor authentication</h3>
+            <p style="margin:0 0 0.75rem;color:#666">Enter the code from your authenticator app or SMS.</p>
+            <input id="mfaCodeInput" placeholder="123456" style="width:100%;padding:0.6rem 0.75rem;margin-bottom:0.75rem;border:1px solid #ddd;border-radius:8px;font-size:1rem;" />
+            <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+              <button id="mfaCancelBtn" style="padding:0.5rem 0.9rem;border-radius:8px;border:1px solid #ccc;background:#fff;">Cancel</button>
+              <button id="mfaVerifyBtn" style="padding:0.5rem 0.9rem;border-radius:8px;border:none;background:var(--primary);color:#fff;">Verify</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', html);
+
+      document.getElementById('mfaCancelBtn').addEventListener('click', () => {
+        const modal = document.getElementById('mfaModal'); if (modal) modal.remove();
+      });
+
+      document.getElementById('mfaVerifyBtn').addEventListener('click', async () => {
+        const code = document.getElementById('mfaCodeInput').value.trim();
+        if (!code) return alert('Please enter the code');
+        try {
+          // Attempt to verify the current challenge using supabase.auth.mfa.verify or challengeAndVerify
+          // If challengeContext contains factorId and challengeId use verify
+          if (window._mfa_challenge && window._mfa_challenge.factorId) {
+            const { data, error } = await supabase.auth.mfa.verify({
+              factorId: window._mfa_challenge.factorId,
+              challengeId: window._mfa_challenge.challengeId,
+              code
+            });
+            if (error) throw error;
+            // On success, supabase should upgrade session; perform handshake
+            await performHandshakeFromClient();
+            showSuccess('MFA verified — redirecting...');
+            setTimeout(() => window.location.replace('Home.html'), 700);
+          } else {
+            // fallback: try challengeAndVerify if only factorId available
+            if (window._mfa_factorId) {
+              const { data, error } = await supabase.auth.mfa.challengeAndVerify({ factorId: window._mfa_factorId, code });
+              if (error) throw error;
+              await performHandshakeFromClient();
+              showSuccess('MFA verified — redirecting...');
+              setTimeout(() => window.location.replace('Home.html'), 700);
+            } else {
+              throw new Error('No active MFA challenge');
+            }
+          }
+        } catch (err) {
+          console.error('MFA verify error', err);
+          showError(err.message || 'Invalid code');
+        } finally {
+          const modal = document.getElementById('mfaModal'); if (modal) modal.remove();
+        }
+      });
+    }
+
+    async function performHandshakeFromClient() {
+      // After supabase client has a valid session, hand tokens to server handshake
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || !session.access_token) return;
+      try {
+        await fetch('/auth/handshake', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token })
+        });
+      } catch (err) {
+        console.error('Handshake failed', err);
+      }
+    }
+
+    // Hook into the login flow: if MFA required, create challenge and show modal
+    const origLoginHandler = loginForm.removeEventListener; // noop placeholder
+    // We'll intercept the submit handler logic path above; when supabase returns data or error, we inspect
+    // To integrate cleanly, patch the existing submit handler by wrapping supabase.signInWithPassword call
+    // For simplicity, add a global listener that listens for errors where message contains 'MFA' or check aal level
+
+    // Overwrite signInWithPassword to handle MFA flows (non-invasive)
+    const realSignInWithPassword = supabase.auth.signInWithPassword.bind(supabase.auth);
+    supabase.auth.signInWithPassword = async function (creds) {
+      const res = await realSignInWithPassword(creds);
+      // If response contains 'mfa' info or requires extra verification, SDK may not throw error but return data with 'mfa' state.
+      // We'll check aal level: if aal !== 'aal2' but user has enrolled factors, create a challenge.
+      try {
+        const aal = await supabase.auth.mfa.getAal();
+        if (aal !== 'aal2') {
+          // create a challenge for the user's enrolled TOTP factor(s)
+          // List factors (not all SDKs expose list; instead create a challenge for the first factor)
+          // We'll attempt to create a generic challenge without factorId using enroll/challenge endpoints where possible.
+          // Best-effort: attempt to call mfa.challenge() and show modal when challenge returned.
+          const challenge = await supabase.auth.mfa.challenge({});
+          if (challenge?.data) {
+            window._mfa_challenge = challenge.data;
+            // store factorId for fallback
+            window._mfa_factorId = challenge.data.factorId || challenge.data.id;
+            showOtpModal(challenge.data);
+          }
+        }
+      } catch (err) {
+        // ignore - not all SDKs/versions support getAal() or challenge()
+        console.debug('MFA auto-challenge skipped', err?.message || err);
+      }
+      return res;
+    };
+
+  </script>
+</body>
+</html>
